@@ -1,5 +1,5 @@
 # Multi-stage build for stefanskiasan/everhour-mcp-server
-# Wraps the stdio MCP server with supergateway to expose HTTP/SSE for Railway.
+# Wraps the stdio MCP server with supergateway behind an Express bearer auth proxy.
 
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -12,16 +12,15 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Install supergateway globally for the stdio→SSE wrapper
+# supergateway is the stdio→HTTP wrapper, installed globally so auth-proxy can spawn it
 RUN npm install -g supergateway
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
+COPY auth-proxy.js ./
 
-# Railway provides PORT at runtime; default to 8080 for local testing
 ENV PORT=8080
 EXPOSE 8080
 
-# supergateway spawns the stdio server and exposes it on /sse
-CMD ["sh", "-c", "supergateway --stdio 'node build/index.js' --outputTransport streamableHttp --port ${PORT}"]
+CMD ["node", "auth-proxy.js"]
