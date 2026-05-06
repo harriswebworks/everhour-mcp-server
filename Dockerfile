@@ -24,4 +24,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # supergateway spawns the stdio server and exposes it on /sse
-CMD ["sh", "-c", "supergateway --stdio 'node build/index.js' --port ${PORT}"]
+CMD ["sh", "-c", "supergateway --stdio 'node build/index.js' --outputTransport streamableHttp --port ${PORT}"]
