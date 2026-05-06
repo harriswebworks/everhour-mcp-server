@@ -1,0 +1,23 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - everhourApiKey
+    properties:
+      everhourApiKey:
+        type: string
+        description: Your Everhour API key. Find it in your Everhour profile page at the bottom.
+      readonlyMode:
+        type: boolean
+        default: true
+        description: When true, blocks write and delete operations. Leave on for initial testing.
+  commandFunction: |-
+    (config) => ({
+      command: 'node',
+      args: ['build/index.js'],
+      env: {
+        EVERHOUR_API_KEY: config.everhourApiKey,
+        EVERHOUR_READONLY_MODE: String(config.readonlyMode)
+      }
+    })
