@@ -18,9 +18,9 @@ RUN npm install -g supergateway
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
-COPY auth-proxy.js ./
+COPY auth-proxy.cjs ./
 
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["node", "auth-proxy.js"]
+CMD ["node", "auth-proxy.cjs"]
