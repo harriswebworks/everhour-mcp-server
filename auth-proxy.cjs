@@ -45,19 +45,23 @@ supergateway.on('exit', (code, signal) => {
 setTimeout(() => {
   const app = express();
 
-  // Unauthenticated health check for Railway / uptime pings
+  // Health check (no auth)
   app.get('/healthz', (req, res) => {
     res.status(200).json({ status: 'ok' });
   });
 
-  // Auth gate
+  // Auth gate via URL path
   app.use((req, res, next) => {
-    const authHeader = req.headers.authorization || '';
-    const expected = `Bearer ${AUTH_TOKEN}`;
-    if (authHeader !== expected) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    const tokenPrefix = `/${AUTH_TOKEN}`;
+    if (
+      req.url === tokenPrefix ||
+      req.url.startsWith(tokenPrefix + '/') ||
+      req.url.startsWith(tokenPrefix + '?')
+    ) {
+      req.url = req.url.slice(tokenPrefix.length) || '/';
+      return next();
     }
-    next();
+    return res.status(404).json({ error: 'Not Found' });
   });
 
   // Proxy authenticated requests to supergateway
